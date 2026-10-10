@@ -2,70 +2,68 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Models\Computer;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 
 class ComputerController extends Controller
 {
-    public function index()
+    private function fetchDataFromApi( string $url)
     {
-        $computers = Computer::all();
-
-        return view('Computer.create', compact('computers'));
+        $response = Http::get($url);
+        return $response->json();
     }
 
+    public function index()
+    {
+        $url = env('URL_SERVER_API');
+
+        $computers = $this->fetchDataFromApi($url . '/computer');
+
+        return view('computer.index', compact('computers'));
+    }
+
+    public function show(string $id)
+    {
+        $url = env('URL_SERVER_API');
+
+        $computer = $this->fetchDataFromApi($url . '/computer/' . $id);
+
+        return view('computer.show', compact('computer'));
+    }
     public function create()
     {
-        $computers = Computer::all();
-
-        return view('Computer.create', compact('computers'));
+        return view('computer.create');
     }
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'brand'  => 'required|string|max:100',
-        ]);
+        $url = env('URL_SERVER_API');
 
-        Computer::create($data);
+        Http::post($url . '/computer', $request->all());
 
-        return redirect()
-            ->route('computer.create')
-            ->with('success', 'Computador registrado correctamente.');
+        return redirect()->route('computer.index');
     }
 
-    public function show(Computer $computer)
+    public function edit(string $id)
     {
-        return view('Computer.show', compact('computer'));
+        $url = env('URL_SERVER_API');
+        $computer = $this->fetchDataFromApi($url . '/computer/' . $id);
+        return view('computer.edit', compact('computer'));
     }
 
-    public function edit(Computer $computer)
+    public function update(Request $request, string $id)
     {
-        return view('Computer.edit', compact('computer'));
+        $url = env('URL_SERVER_API');
+
+        Http::put($url . '/computer/' . $id, $request->all());
+
+        return redirect()->route('computer.index');
     }
 
-    public function update(Request $request, Computer $computer)
+    public function destroy(string $id)
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'brand'  => 'required|string|max:100',
-        ]);
-
-        $computer->update($data);
-
-        return redirect()
-            ->route('computer.create')
-            ->with('success', 'Computador actualizado correctamente.');
-    }
-
-    public function destroy(Computer $computer)
-    {
-        $computer->delete();
-
-        return redirect()
-            ->route('computer.create')
-            ->with('success', 'Computador eliminado correctamente.');
+        $url = env('URL_SERVER_API');
+        Http::delete($url . '/computer/' . $id);
+        return redirect()->route('computer.index');
     }
 }

@@ -2,63 +2,73 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
-use App\Models\Area;
 
 class AreaController extends Controller
 {
+
+    // Método privado para manejar llamadas HTTP repetitivas
+    private function fetchDataFromApi(string $url)
+    {
+        $response = Http::get($url);
+        return $response->json();
+    }
+
     public function index()
     {
-        $areas = Area::all();
-        return view('Area.index', compact('areas'));
+        $url = env('URL_SERVER_API');
+
+        $area = $this->fetchDataFromApi($url . '/area');
+
+        return view('area.index', compact('area'));
     }
+
+    public function show(int $id)
+    {
+        $url = env('URL_SERVER_API');
+
+        $area = $this->fetchDataFromApi($url . '/area/' . $id);
+
+        return view('area.show', compact('area'));
+    }
+
 
     public function create()
     {
-        $areas = Area::all();
-
-        return view('Area.create', compact('areas'));
+        return view('area.create');
     }
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
+        $url = env('URL_SERVER_API');
 
-        Area::create($data);
+        Http::post($url . '/area', $request->all());
 
-        return redirect()
-            ->route('area.create')
-            ->with('success', 'Área creada correctamente.');
+        return redirect()->route('area.index');
     }
 
-    public function show(Area $area)
+    public function edit(int $id)
     {
-        return view('Area.show', compact('area'));
+        $url = env('URL_SERVER_API');
+        $area = $this->fetchDataFromApi($url . '/area/' . $id);
+        return view('area.edit', compact('area'));
     }
 
-    public function edit(Area $area)
+    public function update(Request $request, int $id)
     {
-        return view('Area.edit', compact('area'));
+        $url = env('URL_SERVER_API');
+
+        Http::put($url . '/area/' . $id, $request->all());
+
+        return redirect()->route('area.index');
     }
 
-    public function update(Request $request, Area $area)
+    public function destroy(int $id)
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
-
-        $area->update($data);
-
-        return redirect()->route('area.create')->with('success', 'Área actualizada correctamente.');
+        $url = env('URL_SERVER_API');
+        Http::delete($url . '/area/' . $id);
+        return redirect()->route('area.index');
     }
 
-    public function destroy(Area $area)
-    {
-        $area->delete();
-
-        return redirect()->route('area.create')->with('success', 'Área eliminada correctamente.');
-    }
 }
