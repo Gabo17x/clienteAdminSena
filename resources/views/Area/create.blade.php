@@ -64,7 +64,7 @@
             <h5 class="fw-bold mb-0" style="color: #00324D;">Áreas registradas</h5>
         </div>
         <div class="p-0">
-            @if($areas->isEmpty())
+            @if ($areas->isEmpty())
                 <div class="text-center py-5 text-secondary">
                     <i class="bi bi-folder-x fs-1 d-block mb-2"></i>
                     <em>No hay áreas registradas aún.</em>

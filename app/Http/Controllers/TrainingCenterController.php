@@ -2,68 +2,67 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Http;
+use App\Models\TrainingCenter;
 use Illuminate\Http\Request;
 
 class TrainingCenterController extends Controller
 {
-    private function fetchDataFromApi(string $url)
-    {
-        $response = Http::get($url);
-        return $response->json();
-    }
-
     public function index()
     {
-        $url = env('URL_SERVER_API');
+        $training_centers = TrainingCenter::all();
 
-        $trainingCenters = $this->fetchDataFromApi($url . '/training-center');
-
-        return view('trainingCenter.index', compact('trainingCenters'));
+        return view('Trainig_Center.create', compact('training_centers'));
     }
 
-    public function show(string $id)
-    {
-        $url = env('URL_SERVER_API');
-
-        $trainingCenter = $this->fetchDataFromApi($url . '/training-center/' . $id);
-
-        return view('trainingCenter.show', compact('trainingCenter'));
-    }
     public function create()
     {
-        return view('trainingCenter.create');
+        return $this->index();
     }
 
     public function store(Request $request)
     {
-        $url = env('URL_SERVER_API');
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'location' => 'required|string|max:255',
+        ]);
 
-        Http::post($url . '/training-center', $request->all());
+        TrainingCenter::create($data);
 
-        return redirect()->route('trainingCenter.index');
+        return redirect()
+            ->route('training_center.index')
+            ->with('success', 'Centro de formación creado correctamente.');
     }
 
-    public function edit(string $id)
+    public function show(TrainingCenter $training_center)
     {
-        $url = env('URL_SERVER_API');
-        $trainingCenter = $this->fetchDataFromApi($url . '/training-center/' . $id);
-        return view('trainingCenter.edit', compact('trainingCenter'));
+        return view('Trainig_Center.show', compact('training_center'));
     }
 
-    public function update(Request $request, string $id)
+    public function edit(TrainingCenter $training_center)
     {
-        $url = env('URL_SERVER_API');
-
-        Http::put($url . '/training-center/' . $id, $request->all());
-
-        return redirect()->route('trainingCenter.index');
+        return view('Trainig_Center.edit', compact('training_center'));
     }
 
-    public function destroy(string $id)
+    public function update(Request $request, TrainingCenter $training_center)
     {
-        $url = env('URL_SERVER_API');
-        Http::delete($url . '/training-center/' . $id);
-        return redirect()->route('trainingCenter.index');
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'location' => 'required|string|max:255',
+        ]);
+
+        $training_center->update($data);
+
+        return redirect()
+            ->route('training_center.index')
+            ->with('success', 'Centro de formación actualizado correctamente.');
+    }
+
+    public function destroy(TrainingCenter $training_center)
+    {
+        $training_center->delete();
+
+        return redirect()
+            ->route('training_center.index')
+            ->with('success', 'Centro de formación eliminado correctamente.');
     }
 }

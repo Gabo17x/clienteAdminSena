@@ -61,7 +61,7 @@
             <h5 class="fw-bold mb-0" style="color: #00324D;">Computadores registrados</h5>
         </div>
         <div class="p-0">
-            @if($computers->isEmpty())
+            @if ($computers->isEmpty())
                 <div class="text-center py-5 text-secondary">
                     <i class="bi bi-folder-x fs-1 d-block mb-2"></i>
                     <em>No hay computadores registrados aún.</em>
@@ -122,7 +122,7 @@
 
             <div class="row g-3" style="max-width: 600px;">
                 <div class="col-12">
-                    <label for="number" class="form-label small fw-bold text-secondary">Número de Equipo</label>
+                    <label for="name" class="form-label small fw-bold text-secondary">Número de Equipo</label>
                     <input type="text"
                         name="name"
                         id="name"
@@ -133,7 +133,7 @@
                     @error('name')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
-                </div>
+                    </div>
 
                 <div class="col-12">
                     <label for="brand" class="form-label small fw-bold text-secondary">Marca del Computador</label>
