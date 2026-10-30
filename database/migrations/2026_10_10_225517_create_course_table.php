@@ -6,22 +6,28 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('course', function (Blueprint $table) {
+        Schema::create('courses', function (Blueprint $table) {
             $table->id();
+            $table->string('course_number');
+            $table->string('day');
+            $table->foreignId('area_id')->nullable()->constrained('area')->nullOnDelete();
+            $table->foreignId('training_center_id')->nullable()->constrained('training_center')->nullOnDelete();
+            $table->timestamps();
+        });
+
+        Schema::create('course_teachers', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('course_id')->nullable()->constrained('courses')->nullOnDelete();
+            $table->foreignId('teacher_id')->nullable()->constrained('teachers')->nullOnDelete();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('course');
+        Schema::dropIfExists('course_teachers');
+        Schema::dropIfExists('courses');
     }
 };

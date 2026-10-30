@@ -2,66 +2,76 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Area;
+use App\Models\Computer;
+use App\Models\course;
+use App\Models\TrainingCenter;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 
 class CourseController extends Controller
 {
-    private function fetchDataFromApi(string $url): array
-    {
-        $response = Http::get($url);
-        return $response->json();
-    }
-
     public function index()
     {
-        $url = env('URL_SERVER_API');
-        $courses = $this->fetchDataFromApi($url . '/course');
-        return view('course.index', compact('courses'));
+        return redirect()->route('course.create');
     }
 
     public function show(string $id)
     {
-        $url = env('URL_SERVER_API');
-        $course = $this->fetchDataFromApi($url . '/course/' . $id);
-        return view('course.show', compact('course'));
+        $course = course::with(['area', 'trainingCenter'])->findOrFail($id);
+
+        return view('Courses.show', compact('course'));
     }
 
     public function create()
     {
-        $url = env('URL_SERVER_API');
-        $areas = $this->fetchDataFromApi($url . '/area');
-        $training_centers = $this->fetchDataFromApi($url . '/training-center');
-        return view('course.create', compact('areas', 'training_centers'));
+        $courses = course::with(['area', 'trainingCenter'])->get();
+        $areas = Area::all();
+        $training_centers = TrainingCenter::all();
+
+        return view('Courses.create', compact('courses', 'areas', 'training_centers'));
     }
 
     public function store(Request $request)
     {
-        $url = env('URL_SERVER_API');
-        Http::post($url . '/course', $request->all());
-        return redirect()->route('course.index');
+        $data = $request->validate([
+            'course_number' => ['required', 'string', 'max:255'],
+            'day' => ['required', 'string', 'max:255'],
+            'area_id' => ['required', 'exists:area,id'],
+            'training_center_id' => ['required', 'exists:training_center,id'],
+        ]);
+
+        course::create($data);
+
+        return redirect()->route('course.create')->with('success', 'Curso registrado correctamente.');
     }
 
     public function edit(string $id)
     {
-        $url = env('URL_SERVER_API');
-        $course = $this->fetchDataFromApi($url . '/course/' . $id);
-        $areas = $this->fetchDataFromApi($url . '/area');
-        $training_centers = $this->fetchDataFromApi($url . '/training-center');
-        return view('course.edit', compact('course', 'areas', 'training_centers'));
+        $course = course::findOrFail($id);
+        $areas = Area::all();
+        $training_centers = TrainingCenter::all();
+
+        return view('Courses.edit', compact('course', 'areas', 'training_centers'));
     }
 
     public function update(Request $request, string $id)
     {
-        $url = env('URL_SERVER_API');
-        Http::put($url . '/course/' . $id, $request->all());
-        return redirect()->route('course.index');
+        $data = $request->validate([
+            'course_number' => ['required', 'string', 'max:255'],
+            'day' => ['required', 'string', 'max:255'],
+            'area_id' => ['required', 'exists:area,id'],
+            'training_center_id' => ['required', 'exists:training_center,id'],
+        ]);
+
+        course::findOrFail($id)->update($data);
+
+        return redirect()->route('course.create')->with('success', 'Curso actualizado correctamente.');
     }
 
     public function destroy(string $id)
     {
-        $url = env('URL_SERVER_API');
-        Http::delete($url . '/course/' . $id);
-        return redirect()->route('course.index');
+        course::findOrFail($id)->delete();
+
+        return redirect()->route('course.create')->with('success', 'Curso eliminado correctamente.');
     }
 }

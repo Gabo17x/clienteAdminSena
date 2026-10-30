@@ -2,66 +2,78 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\apprentice;
+use App\Models\Computer;
+use App\Models\course;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 
 class ApprenticeController extends Controller
 {
-    private function fetchDataFromApi(string $url)
-    {
-        $response = Http::get($url);
-        return $response->json();
-    }
-
     public function index()
     {
-        $url = env('URL_SERVER_API');
-        $apprentices = $this->fetchDataFromApi($url . '/apprentice');
-        return view('Apprentice.index', compact('apprentices'));
+        return redirect()->route('apprentice.create');
     }
 
     public function show(string $id)
     {
-        $url = env('URL_SERVER_API');
-        $apprentice = $this->fetchDataFromApi($url . '/apprentice/' . $id);
+        $apprentice = apprentice::findOrFail($id);
+
         return view('Apprentice.show', compact('apprentice'));
     }
 
     public function create()
     {
-        $url = env('URL_SERVER_API');
-        $courses = $this->fetchDataFromApi($url . '/course');
-        $computers = $this->fetchDataFromApi($url . '/computer');
-        return view('Apprentice.create', compact('courses', 'computers'));
+        $apprentices = apprentice::with(['course', 'computer'])->get();
+        $courses = course::all();
+        $computers = Computer::all();
+
+        return view('Apprentice.create', compact('apprentices', 'courses', 'computers'));
     }
 
     public function store(Request $request)
     {
-        $url = env('URL_SERVER_API');
-        Http::post($url . '/apprentice', $request->all());
-        return redirect()->route('apprentice.index');
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255'],
+            'number' => ['required', 'string', 'max:255'],
+            'course_id' => ['nullable', 'exists:courses,id'],
+            'computer_id' => ['nullable', 'exists:computer,id'],
+        ]);
+
+        apprentice::create($data);
+
+        return redirect()->route('apprentice.create')->with('success', 'Aprendiz registrado correctamente.');
     }
 
     public function edit(string $id)
     {
-        $url = env('URL_SERVER_API');
-        $apprentice = $this->fetchDataFromApi($url . '/apprentice/' . $id);
-        $courses = $this->fetchDataFromApi($url . '/course');
-        $computers = $this->fetchDataFromApi($url . '/computer');
+        $apprentice = apprentice::findOrFail($id);
+        $courses = course::all();
+        $computers = Computer::all();
+
         return view('Apprentice.edit', compact('apprentice', 'courses', 'computers'));
     }
 
     public function update(Request $request, string $id)
     {
-        $url = env('URL_SERVER_API');
-        Http::put($url . '/apprentice/' . $id, $request->all());
-        return redirect()->route('apprentice.index');
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255'],
+            'number' => ['required', 'string', 'max:255'],
+            'course_id' => ['nullable', 'exists:courses,id'],
+            'computer_id' => ['nullable', 'exists:computer,id'],
+        ]);
+
+        $apprentice = apprentice::findOrFail($id);
+        $apprentice->update($data);
+
+        return redirect()->route('apprentice.create')->with('success', 'Aprendiz actualizado correctamente.');
     }
 
     public function destroy(string $id)
     {
-        $url = env('URL_SERVER_API');
-        Http::delete($url . '/apprentice/' . $id);
-        return redirect()->route('apprentice.index');
+        apprentice::findOrFail($id)->delete();
+
+        return redirect()->route('apprentice.create')->with('success', 'Aprendiz eliminado correctamente.');
     }
 }

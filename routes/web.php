@@ -6,11 +6,12 @@ use App\Http\Controllers\TrainingCenterController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\ApprenticeController;
 use App\Http\Controllers\TeacherController;
-use App\Http\Controllers\HomeController;
+use App\Http\Controllers\OfferController;
+use App\Http\Controllers\AmbientController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'Home.home')->name('home');
-Route::view('/quienes-somos', 'Home.about')->name('quienes-somos');
+Route::view('/quienes-somos', 'quienes-somos.index')->name('quienes-somos');
 
 // Áreas
 Route::get('area', [AreaController::class, 'index'])->name('area.index');
@@ -58,7 +59,6 @@ Route::delete('apprentice/{apprentice}', [ApprenticeController::class, 'destroy'
 Route::get('apprentice/{apprentice}', [ApprenticeController::class, 'show'])->name('apprentice.show');
 
 
-
 // Instructores
 Route::get('teacher', [TeacherController::class, 'index'])->name('teacher.index');
 Route::get('teacher/create', [TeacherController::class, 'create'])->name('teacher.create');
@@ -68,5 +68,20 @@ Route::put('teacher/{teacher}', [TeacherController::class, 'update'])->name('tea
 Route::delete('teacher/{teacher}', [TeacherController::class, 'destroy'])->name('teacher.destroy');
 Route::get('teacher/{teacher}', [TeacherController::class, 'show'])->name('teacher.show');
 
+// Ambientes
+Route::get('ambients', [AmbientController::class, 'index'])->name('ambients.index');
+Route::get('ambients/create', [AmbientController::class, 'create'])->name('ambients.create');
+Route::post('ambients/store', [AmbientController::class, 'store'])->name('ambients.store');
+Route::get('ambients/{ambient}', [AmbientController::class, 'show'])->name('ambients.show');
+Route::get('ambients/{ambient}/edit', [AmbientController::class, 'edit'])->name('ambients.edit');
+Route::put('ambients/{ambient}', [AmbientController::class, 'update'])->name('ambients.update');
+Route::delete('ambients/{ambient}', [AmbientController::class, 'destroy'])->name('ambients.destroy');
 
-
+// Rutas de Ofertas
+Route::get('offers', [OfferController::class, 'index'])->name('offers.index');
+Route::get('offers/create', [OfferController::class, 'create'])->name('offers.create');
+Route::post('offers/store', [OfferController::class, 'store'])->name('offers.store');
+Route::get('offers/{offer}', [OfferController::class, 'show'])->name('offers.show');
+Route::get('offers/{offer}/edit', [OfferController::class, 'edit'])->name('offers.edit');
+Route::put('offers/{offer}', [OfferController::class, 'update'])->name('offers.update');
+Route::delete('offers/{offer}', [OfferController::class, 'destroy'])->name('offers.destroy');

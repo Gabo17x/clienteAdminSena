@@ -2,83 +2,75 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Area;
+use App\Models\teacher;
+use App\Models\TrainingCenter;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 
 class TeacherController extends Controller
 {
-    // Método privado para manejar llamadas HTTP repetitivas
-    private function fetchDataFromApi(string $url)
-    {
-        $response = Http::get($url);
-        return $response->json();
-    }
-
     public function index()
     {
-        $url = env('URL_SERVER_API');
-
-        $teachers = $this->fetchDataFromApi($url . '/teacher');
-
-        return view('teacher.index', compact('teachers'));
+        return redirect()->route('teacher.create');
     }
 
     public function show(string $id)
     {
-        $url = env('URL_SERVER_API');
+        $teacher = teacher::with(['area', 'trainingCenter'])->findOrFail($id);
 
-        $teacher = $this->fetchDataFromApi($url . '/teacher/' . $id);
-
-        return view('teacher.show', compact('teacher'));
+        return view('Teacher.show', compact('teacher'));
     }
-
 
     public function create()
     {
-        $url = env('URL_SERVER_API');
+        $teachers = teacher::with(['area', 'trainingCenter'])->get();
+        $areas = Area::all();
+        $training_centers = TrainingCenter::all();
 
-        $areas = $this->fetchDataFromApi($url . '/area');
-        $training_centers = $this->fetchDataFromApi($url . '/training-center');
-
-        return view('teacher.create', compact('areas', 'training_centers'));
+        return view('Teacher.create', compact('teachers', 'areas', 'training_centers'));
     }
-
-
 
     public function store(Request $request)
     {
-        $url = env('URL_SERVER_API');
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'location' => ['required', 'string', 'max:255'],
+            'area_id' => ['required', 'exists:area,id'],
+            'training_center_id' => ['required', 'exists:training_center,id'],
+        ]);
 
-        Http::post($url . '/teacher', $request->all());
+        teacher::create($data);
 
-        return redirect()->route('teacher.index');
+        return redirect()->route('teacher.create')->with('success', 'Instructor registrado correctamente.');
     }
 
     public function edit(string $id)
     {
-        $url = env('URL_SERVER_API');
-        
-        $teacher = $this->fetchDataFromApi($url . '/teacher/' . $id);
-        $areas = $this->fetchDataFromApi($url . '/area');
-        $training_centers = $this->fetchDataFromApi($url . '/training-center');
+        $teacher = teacher::findOrFail($id);
+        $areas = Area::all();
+        $training_centers = TrainingCenter::all();
 
-
-        return view('teacher.edit', compact('teacher', 'areas', 'training_centers'));
+        return view('Teacher.edit', compact('teacher', 'areas', 'training_centers'));
     }
 
     public function update(Request $request, string $id)
     {
-        $url = env('URL_SERVER_API');
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'location' => ['required', 'string', 'max:255'],
+            'area_id' => ['required', 'exists:area,id'],
+            'training_center_id' => ['required', 'exists:training_center,id'],
+        ]);
 
-        Http::put($url . '/teacher/' . $id, $request->all());
+        teacher::findOrFail($id)->update($data);
 
-        return redirect()->route('teacher.index');
+        return redirect()->route('teacher.create')->with('success', 'Instructor actualizado correctamente.');
     }
-          
+
     public function destroy(string $id)
     {
-        $url = env('URL_SERVER_API');
-        Http::delete($url . '/teacher/' . $id);
-        return redirect()->route('teacher.index');
+        teacher::findOrFail($id)->delete();
+
+        return redirect()->route('teacher.create')->with('success', 'Instructor eliminado correctamente.');
     }
 }
